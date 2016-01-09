@@ -55,6 +55,6 @@ BeanGunShot.prototype = new ShotBase();
 	};
 
     Shot.prototype.hit = function(App, target) {
-
+    	
     }
 })(BeanGunShot);

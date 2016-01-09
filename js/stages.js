@@ -2,37 +2,40 @@
 
 let Stage = function(){};
 (function(Stage) {
-	Stage.prototype.init = function (App) {
-	};
+    Stage.prototype.init = function (App) {
+    };
 
-	Stage.prototype.preprocess = function() {
+    Stage.prototype.dispose = function (App) {
 
-	};
-
-	Stage.prototype.dispose = function () {
-
-	};
+    };
 })(Stage);
 
 let DummyStage = function(){};
 DummyStage.prototype = new Stage();
 (function(DummyStage) {
-	Stage.prototype.init = function (App) {
-		if (!App.player) {
-			App.player = new Player();
-			App.player.position = vector2(100, 240);
-			App.player.changeState(new PlayerStateSpownDelay());
-			App.player.changeWeapon(new BeanGunWeapon());
+    Stage.prototype.init = function (App) {
+        if (!App.player) {
+            App.player = new Player();
+            App.player.position = vector2(100, 240);
+            App.player.changeState(new PlayerStateSpownDelay());
+            App.player.changeWeapon(new BeanGunWeapon());
             
             App.player.powerLevelUP(2);
-		}
-	};
+        }
+    };
 
-	Stage.prototype.preprocess = function() {
+    var f = false;
+    Stage.prototype.preProcess = function(App) {
+    	if (!(~~(Math.random()*10))) {
+   			f = true;
+    		const enemy = new RectEnemy();
+    		const rect = App.getBoundsRect();
+    		enemy.position = vector2(rect.right, ~~(Math.random()*rect.bottom));
+    		App.addEnemy(enemy);
+    	}
+    };
 
-	};
-
-	Stage.prototype.dispose = function () {
+    Stage.prototype.dispose = function (App) {
         
-	};
+    };
 })(DummyStage);
