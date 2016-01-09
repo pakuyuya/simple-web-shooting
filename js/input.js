@@ -1,7 +1,7 @@
 'use strict';
 
 var Input = Input || function(){ this.construct(); };
-(function(Input){ 
+(function(Input, W, D){ 
     const keycodes = {
         37 : 'Left', 38 : 'Up', 39 : 'Right', 40 : 'Down',
         48 : '0', 49 : '1', 50 : '2', 51 : '3', 52 : '4', 53 : '5', 54 : '6', 55 : '7', 56 : '8', 57 : '9',
@@ -22,6 +22,8 @@ var Input = Input || function(){ this.construct(); };
         'Mouse' : 'mouse',
         'MouseMove'  : 'mouseMove',
     };
+    let domKeyhandling = null;
+
     Input.prototype.construct = function() {
         for (let k in this.keysignalmapping) {
             this.signal[this.keysignalmapping[k]] = { fire : false, release : false, hold : false, };
@@ -29,21 +31,32 @@ var Input = Input || function(){ this.construct(); };
     };
     
     Input.prototype.watch = function(dom) {
-        var domKeyhandling = document.createElement('input');
-        Object.assign(domKeyhandling.style, {height : '1px', width: '1px', margin :'0', padding:'0', position : 'absolute', left:'-10000px'});
+        domKeyhandling = D.createElement('input');
+        const $domKeyhandling = $(domKeyhandling);
 
-        document.body.appendChild(domKeyhandling);
+        $domKeyhandling.css({height : '1px', width: '1px', margin :'0', padding:'0', position : 'absolute', left:'-10000px'});
 
-        domKeyhandling.addEventListener('keydown', onkeydown);
-        domKeyhandling.addEventListener('keyup', onkeyup);
-        dom.addEventListener('click', onclick);
-        dom.addEventListener('mouseup', onmouseup);
-        dom.addEventListener('mousedown', onmousedown);
-        dom.addEventListener('mousemove', onmousemove);
+        $(D.body).append($domKeyhandling);
+
+        $domKeyhandling
+            .keydown(onkeydown)
+            .keyup(onkeyup);
+        
+        $(dom)
+            .click(onclick)
+            .mouseup(onmouseup)
+            .mousedown(onmousedown)
+            .mousemove(onmousemove);
         
         dom.refWatcher  = this;
         dom.refInputDOM = domKeyhandling;
         domKeyhandling.refWatcher = this;
+
+        $(W)
+            .resize(onwndresize)
+            .scroll(onwndscroll);
+
+        replaceKeyHandlingElm();
     };
     
     Input.prototype.fireSignal = function(signal) {
@@ -90,33 +103,44 @@ var Input = Input || function(){ this.construct(); };
         return this.mouse;
     };
 
-    var onclick = function(e) {
-        e.srcElement.refInputDOM.focus();
+    function replaceKeyHandlingElm() {
+        const pos = $(W).scrollTop();
+        $(domKeyhandling).css('top', pos + 'px');
     };
 
-    var onmousedown = function(e) {
+    function onclick(e) {
+        e.target.refInputDOM.focus();
+    };
+
+    function onmousedown(e) {
         this.refWatcher.fireSignal('mouse');
     };
-    var onmouseup = function(e) {
+    function onmouseup(e) {
         this.refWatcher.releaseSignal('mouse');
     };
-    var onkeydown = function(e) {
+    function onkeydown(e) {
         var key = keycodes[e.keyCode];
         if (this.refWatcher.keysignalmapping[key]) {
             this.refWatcher.fireSignal(this.refWatcher.keysignalmapping[key]);
         }
     };
-    var onkeyup = function(e) {
+    function onkeyup(e) {
         var key = keycodes[e.keyCode];
         if (this.refWatcher.keysignalmapping[key]) {
             this.refWatcher.releaseSignal(this.refWatcher.keysignalmapping[key]);
         }
     };
-    var onmousemove = function(e) {
+    function onmousemove(e) {
         this.refWatcher.mouse.x = e.x;
         this.refWatcher.mouse.y = e.y;
 
         this.refWatcher.pushSignal('mouseMove');
     };
-    
-})(Input);
+
+    function onwndscroll(e) {
+        replaceKeyHandlingElm();
+    };
+    function onwndresize(e) {
+        replaceKeyHandlingElm();
+    };
+})(Input, window, document);
