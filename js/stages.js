@@ -17,7 +17,7 @@ DummyStage.prototype = new Stage();
         if (!App.player) {
             App.player = new Player();
             App.player.position = vector2(100, 240);
-            App.player.changeState(new PlayerStateSpownDelay());
+            App.respownPlayer();
             App.player.changeWeapon(new BeanGunWeapon());
             
             App.player.powerLevelUP(2);

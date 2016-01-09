@@ -14,7 +14,7 @@ BeanGunShot.prototype = new ShotBase();
 
 
 (function(Shot){
-	Shot.prototype.power = 0;
+	Shot.prototype.damage = 0;
 	Shot.prototype.vector = vector2(0.0, 0.0);
     Shot.prototype.size = 0;
 
@@ -50,11 +50,22 @@ BeanGunShot.prototype = new ShotBase();
 		this.position.y += this.vector.y;
 	};
 
-	Shot.prototype.hitTest = function(App, rect) {
-        return false;
+	Shot.prototype.hitTest = function(App, entity, rect) {
+		const x = this.position.x;
+		const y = this.position.y;
+		const size = this.size;
+        const selfrect = {
+        	left:   x - size,
+        	right:  x + size,
+        	top:    y - size,
+        	bottom: y + size,
+        };
+        return ((rect.left - selfrect.right > 0)^(rect.right - selfrect.left >= 0))
+            && ((rect.top - selfrect.bottom > 0)^(rect.bottom - selfrect.top >= 0));
 	};
 
     Shot.prototype.hit = function(App, target) {
-    	
-    }
+    	if (target.damage) target.damage(App, this);
+    	App.removeShot(this);
+    };
 })(BeanGunShot);

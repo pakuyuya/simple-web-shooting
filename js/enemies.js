@@ -9,20 +9,16 @@ let EnemyBase = function(){ this.construct(); };
     };
     
     Enemy.prototype.requestHitTest = function(App, entity) {
-        entity.hitTest(App, this, this.resolveRectDefault());
+        return entity.hitTest(App, this, this.resolveRectDefault());
     };
     Enemy.prototype.hitTest = function(App, entity, rect) {
-        this.hitTestDefault(App, entity, rect);
+        return this.hitTestDefault(App, entity, rect);
     };
 
     Enemy.prototype.hitTestDefault = function(App, entity, rect) {
         const selfrect = this.resolveRectDefault();
-        if (
-            ((rect.left - selfrect.right > 0)^(rect.right - selfrect.left >= 0))
-            && ((rect.top - selfrect.bottom > 0)^(rect.bottom - selfrect.top >= 0)) 
-            ) {
-            if (entity.damage) entity.damage(App, this);
-        }
+        return ((rect.left - selfrect.right > 0)^(rect.right - selfrect.left >= 0))
+            && ((rect.top - selfrect.bottom > 0)^(rect.bottom - selfrect.top >= 0));
     };
 
     Enemy.prototype.update = function(App) {
@@ -47,7 +43,7 @@ let EnemyBase = function(){ this.construct(); };
     Enemy.prototype.damageDefault = function(App, entity) {
         const damage = ~~entity.damage;
         if (this.life -= damage <= 0) {
-            this.destory(App);
+            this.destroy(App);
         }
     };
 
@@ -69,19 +65,25 @@ let EnemyBase = function(){ this.construct(); };
             bottom: y + size,
         };
     };
+
+    Enemy.prototype.hit = function(App, entity) {
+        if (entity.damage)
+            entity.damage(App, this);
+    };
 })(EnemyBase);
 
 let RectEnemy = function(){ this.construct(); };
 RectEnemy.prototype = new EnemyBase();
 (function(Enemy) {
     Enemy.prototype.life = 100;
-    
+
     Enemy.prototype.construct = function() {};
 
     Enemy.prototype.draw = function(App, ctx) {
         const rect = this.resolveRectDefault();
 
         ctx.strokeStyle = '#000000';
+        ctx.beginPath();
         ctx.rect(rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top);
         ctx.stroke();
     };

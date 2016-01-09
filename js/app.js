@@ -60,7 +60,7 @@ var App = App || {};
         if (App.stage && App.stage.respownProvide) {
             App.stage.respownProvide(App);
         } else {
-            
+            App.respownDefault();
         }
     };
 
@@ -68,7 +68,7 @@ var App = App || {};
      * respownDefault
      */
     App.respownDefault = function() {
-        const bounds = getBoundRect();
+        const bounds = getBoundsRect();
         App.player.position = vector2(100, (bounds.top + bounds.bottom) / 2);
         App.player.changeState(new PlayerStateSpownDelay);
     }
@@ -132,7 +132,8 @@ var App = App || {};
      * @param  {Enemy} e
      */
     App.removeEnemy = function(e) {
-        delete App.enemies[e.hashkey];
+        if (App.enemies[e.hashkey])
+            delete App.enemies[e.hashkey];
     };
 
     /**
@@ -156,7 +157,8 @@ var App = App || {};
      * @param  {PlayerShot} e
      */
     App.removePlayerShot = function(e) {
-        delete App.playerShots[e.hashkey];
+        if (App.playerShots[e.hashkey])
+            delete App.playerShots[e.hashkey];
     };
 
     /**
@@ -179,7 +181,8 @@ var App = App || {};
      * @param  {EnemyShot} e
      */
     App.removeEnemyShot = function(e) {
-        delete App.enemyShots[e.hashkey];
+        if (App.enemyShots[e.hashkey])
+            delete App.enemyShots[e.hashkey];
     };
 
     /**
@@ -188,6 +191,11 @@ var App = App || {};
     App.cleanEnemyShots = function() {
         app.enemyShots = {};
     };
+
+    App.removeShot = function(e) {
+        App.removeEnemyShot(e);
+        App.removePlayerShot(e);
+    }
 
     App.adjustX = function(x) {
         const bounds = getBoundsRect();
@@ -261,16 +269,31 @@ var App = App || {};
         for (let key in App.playerShots) {
             let shot = App.playerShots[key];
             if (shot.update) shot.update(App);
+            for (let key in App.enemies) {
+                let enemy = App.enemies[key];
+                if (enemy.requestHitTest) {
+                    if (enemy.requestHitTest(App, shot)) {
+                        shot.hit(App, enemy);
+                    }
+                }
+            }
         }
         
         for (let key in App.enemies) {
             let enemy = App.enemies[key];
             if (enemy.update) enemy.update(App);
+
+            if (App.player.requestHitTest(App, enemy)) {
+                enemy.hit(App, App.player);
+            }
         }
         
         for (let key in App.enemyShots) {
             let shot = App.enemyShots[key];
             if (shot.update) shot.update(App);
+            if (App.player.requestHitTest(App, shot)) {
+                shot.hit(App, App.player);
+            }
         }
         App.input.resetSignal();
     }

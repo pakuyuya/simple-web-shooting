@@ -42,9 +42,9 @@ PlayerStateSpownDelay.prototype = new PlayerStateBase();
     	}
     };
 
-    PlayerState.prototype.hitTestProvide = function(App, entity) {
+    PlayerState.prototype.requestHitTestProvide = function(App, entity) {
         return false;
-    }
+    };
 })(PlayerStateSpownDelay);
 
 /**
@@ -53,33 +53,33 @@ PlayerStateSpownDelay.prototype = new PlayerStateBase();
 let PlayerStateDestroyed = function(){ this.construct(); };
 PlayerStateDestroyed.prototype = new PlayerStateBase();
 (function(PlayerState){
-    const TIUN_FRAMES = 1500;
+    const TIUN_FRAMES = Settings.defaultFPS * 0.5;
     const TIUN_DISTNANCE_MAX = 100;
     
     const TIUN_CIRCLES = [
         {
             r: 7,
             distances: [
-                {x: -Math.sin(45), y: -Math.sin(45)},
+                {x: -Math.sin(Math.PI * 45.0 / 180.0), y: -Math.sin(Math.PI * 45.0 / 180.0)},
                 {x: 0.0, y: -1.0},
-                {x: Math.sin(45), y: -Math.sin(45)},
+                {x: Math.sin(Math.PI * 45.0 / 180.0), y: -Math.sin(Math.PI * 45.0 / 180.0)},
                 {x: 1.0, y: 0.0},
-                {x: Math.sin(45), y: Math.sin(45)},
+                {x: Math.sin(Math.PI * 45.0 / 180.0), y: Math.sin(Math.PI * 45.0 / 180.0)},
                 {x: 0.0, y: 1.0},
-                {x: -Math.sin(45), y: Math.sin(45)},
+                {x: -Math.sin(Math.PI * 45.0 / 180.0), y: Math.sin(Math.PI * 45.0 / 180.0)},
                 {x: -1.0, y: 0.0},
             ]
         },
         {
             r: 10,
             distances: [
-                {x: -Math.sin(45)/2, y: -Math.sin(45)/2},
+                {x: -Math.sin(Math.PI * 45.0 / 180.0)/2, y: -Math.sin(Math.PI * 45.0 / 180.0)/2},
                 {x: 0.0, y: -0.5},
-                {x: Math.sin(45)/2, y: -Math.sin(45)/2},
+                {x: Math.sin(Math.PI * 45.0 / 180.0)/2, y: -Math.sin(Math.PI * 45.0 / 180.0)/2},
                 {x: 0.5, y: 0.0},
-                {x: Math.sin(45)/2, y: Math.sin(45)/2},
+                {x: Math.sin(Math.PI * 45.0 / 180.0)/2, y: Math.sin(Math.PI * 45.0 / 180.0)/2},
                 {x: 0.0, y: 0.5},
-                {x: -Math.sin(45)/2, y: Math.sin(45)/2},
+                {x: -Math.sin(Math.PI * 45.0 / 180.0)/2, y: Math.sin(Math.PI * 45.0 / 180.0)/2},
                 {x: -0.5, y: 0.0},
             ]
         },
@@ -97,13 +97,25 @@ PlayerStateDestroyed.prototype = new PlayerStateBase();
     	}
     };
 
+    PlayerState.prototype.shotProvide = function(App) {
+
+    };
+
+    PlayerState.prototype.moveProvide = function(App) {
+
+    };
+
+    PlayerState.prototype.requestHitTestProvide = function(App, entity) {
+        return false;
+    };
+
     PlayerState.prototype.drawProvide = function(App, ctx) {
         if (this.passedFrames < TIUN_FRAMES) {
-            const rate = easeOutQuad(1, 0, this.passedFrames, TIUN_FRAMES);
+            const rate = easeOutQuad(this.passedFrames, 0, 1, TIUN_FRAMES);
             const alphatmp = ctx.globalAlpha;
       		ctx.strokeStyle = '#000000';
             ctx.globalAlpha = 1.0 - rate;
-            
+
             const distance_base = rate * TIUN_DISTNANCE_MAX;
             
     		const x = this.player.position.x;
@@ -119,8 +131,7 @@ PlayerStateDestroyed.prototype = new PlayerStateBase();
             		ctx.stroke();
                 }
             }
-    		ctx.closePath();
-            cts.globalAlpha = alphatmp;
+            ctx.globalAlpha = alphatmp;
         }
     };
 

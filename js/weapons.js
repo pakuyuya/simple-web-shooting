@@ -101,7 +101,7 @@ BeanGunWeapon.prototype = new WeaponBase();
             App.addPlayerShot(shot);
 
             shot = new BeanGunShot();
-            shot.position = vector2(position.x + 2, position.y);
+            shot.position = vector2(position.x, position.y);
             shot.vector = vector2(this.speed, 0.2);
             shot.damage = this.damage;
             shot.size = this.shotsize;

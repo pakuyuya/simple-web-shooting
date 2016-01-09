@@ -132,7 +132,7 @@ let Player = function(){ this.construct(); };
 
 	Player.prototype.requestHitTestDefault = function(App, entity) {
 		var playerRect = this.resolvePlayerRect();
-		return entity.hitTest(App, playerRect);
+		return entity.hitTest(App, this, playerRect);
 	};
 
 	Player.prototype.damage = function(App, entity) {
@@ -148,6 +148,14 @@ let Player = function(){ this.construct(); };
 	};
 
 	Player.prototype.shot = function(App) {
+		if (this.state && this.state.shotProvide) {
+			this.state.shotProvide(App);
+		} else {
+			this.shotDefault(App);
+		}
+	};
+
+	Player.prototype.shotDefault = function(App) {
 		if (this.weapon)
 			this.weapon.shot(App);
 	};
